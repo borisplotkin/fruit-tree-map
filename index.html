@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -8,17 +9,17 @@
     <meta name="theme-color" content="#4CAF50">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    
+
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-     crossorigin=""/>
-     
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
     <div id="map"></div>
@@ -30,6 +31,11 @@
         <button id="btn-add-manual" class="fab secondary" title="Add Manually">
             <i class="fas fa-plus"></i>
         </button>
+        <div class="fab secondary" title="Import GPX" style="position: relative; overflow: hidden;">
+            <i class="fas fa-file-import"></i>
+            <input type="file" id="gpx-upload" accept=".gpx"
+                style="position: absolute; top: 0; left: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer;">
+        </div>
     </div>
 
     <!-- Modal for adding tree details -->
@@ -39,24 +45,43 @@
             <form id="tree-form">
                 <div class="form-group">
                     <label for="tree-type">Tree Type</label>
-                    <select id="tree-type" required>
-                        <option value="Apple">Apple</option>
-                        <option value="Pear">Pear</option>
-                        <option value="Cherry">Cherry</option>
-                        <option value="Plum">Plum</option>
-                        <option value="Peach">Peach</option>
-                        <option value="Lemon">Lemon</option>
-                        <option value="Orange">Orange</option>
-                        <option value="Other">Other</option>
-                    </select>
+                    <input type="text" id="tree-type" list="tree-types-list" placeholder="Select or type..." required>
+                    <datalist id="tree-types-list">
+                        <option value="Apple">
+                        <option value="Pear">
+                        <option value="Cherry">
+                        <option value="Plum">
+                        <option value="Peach">
+                        <option value="Lemon">
+                        <option value="Orange">
+                    </datalist>
                 </div>
                 <div class="form-group">
                     <label for="tree-name">Description / Name</label>
                     <input type="text" id="tree-name" placeholder="e.g. Grandma's Apple Tree">
                 </div>
+
+                <!-- Optional Date Fields -->
+                <div class="form-group">
+                    <label for="date-planted">Date Planted (Optional)</label>
+                    <input type="date" id="date-planted">
+                </div>
+                <div class="form-group">
+                    <label for="date-fruited">Date Fruited (Optional)</label>
+                    <input type="date" id="date-fruited">
+                </div>
+                <div class="form-group">
+                    <label for="date-fertilized">Last Fertilized (Optional)</label>
+                    <input type="date" id="date-fertilized">
+                </div>
+                <div class="form-group">
+                    <label for="date-pruned">Last Pruned (Optional)</label>
+                    <input type="date" id="date-pruned">
+                </div>
+
                 <input type="hidden" id="tree-lat">
                 <input type="hidden" id="tree-lng">
-                
+
                 <div class="modal-actions">
                     <button type="button" id="btn-cancel" class="btn-text">Cancel</button>
                     <button type="submit" class="btn-primary">Save Tree</button>
@@ -67,9 +92,9 @@
 
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-     crossorigin=""></script>
-     
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
     <script src="app.js"></script>
 </body>
+
 </html>

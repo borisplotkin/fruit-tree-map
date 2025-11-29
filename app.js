@@ -83,6 +83,10 @@ function setupEventListeners() {
     const btnCancel = document.getElementById('btn-cancel');
     const treeForm = document.getElementById('tree-form');
     const modal = document.getElementById('tree-modal');
+    const gpxUpload = document.getElementById('gpx-upload');
+
+    // GPX Upload
+    gpxUpload.addEventListener('change', handleGPXUpload);
 
     // Add Current Location
     btnAddLocation.addEventListener('click', () => {
@@ -144,17 +148,28 @@ function setupEventListeners() {
         const lat = parseFloat(document.getElementById('tree-lat').value);
         const lng = parseFloat(document.getElementById('tree-lng').value);
 
+        // Optional Dates
+        const datePlanted = document.getElementById('date-planted').value;
+        const dateFruited = document.getElementById('date-fruited').value;
+        const dateFertilized = document.getElementById('date-fertilized').value;
+        const datePruned = document.getElementById('date-pruned').value;
+
         const tree = {
             id: Date.now(),
             type,
             name,
             lat,
             lng,
-            date: new Date().toISOString()
+            date: new Date().toISOString(),
+            datePlanted,
+            dateFruited,
+            dateFertilized,
+            datePruned
         };
 
         saveTree(tree);
         addMarker(tree);
+        updateDatalist();
         closeModal();
     });
 }
@@ -191,17 +206,6 @@ function closeModal() {
 }
 
 // Data Persistence
-function loadTrees() {
-    const storedTrees = localStorage.getItem('fruit-trees');
-    if (storedTrees) {
-        const trees = JSON.parse(storedTrees);
-        trees.forEach(tree => addMarker(tree));
-
-        // Fit bounds if we have trees
-        if (trees.length > 0) {
-            const group = new L.featureGroup(markers);
-            map.fitBounds(group.getBounds().pad(0.1));
-        }
     }
 }
 
@@ -224,15 +228,24 @@ function deleteTree(id) {
         // Reload map
         markers.forEach(marker => map.removeLayer(marker));
         markers = [];
+        // Reload map
+        markers.forEach(marker => map.removeLayer(marker));
+        markers = [];
         loadTrees();
+        updateDatalist();
     }
 }
 
 function addMarker(tree) {
     const marker = L.marker([tree.lat, tree.lng], { icon: treeIcon })
+    const marker = L.marker([tree.lat, tree.lng], { icon: treeIcon })
         .bindPopup(`
             <h3>${tree.type}</h3>
             <p>${tree.name || 'No description'}</p>
+            ${tree.datePlanted ? `<p><small>Planted: ${tree.datePlanted}</small></p>` : ''}
+            ${tree.dateFruited ? `<p><small>Fruited: ${tree.dateFruited}</small></p>` : ''}
+            ${tree.dateFertilized ? `<p><small>Fertilized: ${tree.dateFertilized}</small></p>` : ''}
+            ${tree.datePruned ? `<p><small>Pruned: ${tree.datePruned}</small></p>` : ''}
             <p><small>Added: ${new Date(tree.date).toLocaleDateString()}</small></p>
             <div class="delete-btn" onclick="deleteTree(${tree.id})">Delete Tree</div>
         `);
@@ -252,3 +265,81 @@ function registerServiceWorker() {
 
 // Expose deleteTree to global scope for popup onclick
 window.deleteTree = deleteTree;
+
+// Helper Functions
+function updateDatalist() {
+    const storedTrees = localStorage.getItem('fruit-trees');
+    if (!storedTrees) return;
+
+    const trees = JSON.parse(storedTrees);
+    const types = [...new Set(trees.map(t => t.type))].sort();
+
+    const datalist = document.getElementById('tree-types-list');
+    // Keep default options or clear? Let's append unique ones not already there.
+    // Actually, simpler to rebuild or just add new ones.
+    // Let's just add ones that aren't in the default list.
+
+    types.forEach(type => {
+        // Check if option exists
+        let exists = false;
+        for (let option of datalist.options) {
+            if (option.value === type) {
+                exists = true;
+                break;
+            }
+        }
+        if (!exists) {
+            const option = document.createElement('option');
+            option.value = type;
+            datalist.appendChild(option);
+        }
+    });
+}
+
+function handleGPXUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(e.target.result, "text/xml");
+        const wpts = xmlDoc.getElementsByTagName("wpt");
+
+        let count = 0;
+        for (let i = 0; i < wpts.length; i++) {
+            const lat = parseFloat(wpts[i].getAttribute("lat"));
+            const lon = parseFloat(wpts[i].getAttribute("lon"));
+            const nameTag = wpts[i].getElementsByTagName("name")[0];
+            const name = nameTag ? nameTag.textContent : "Imported Tree";
+
+            // Try to guess type from name or default to 'Other'
+            const type = "Other";
+
+            const tree = {
+                id: Date.now() + i, // Ensure unique ID
+                type,
+                name,
+                lat,
+                lng: lon,
+                date: new Date().toISOString()
+            };
+
+            saveTree(tree);
+            addMarker(tree);
+            count++;
+        }
+
+        if (count > 0) {
+            alert(`Imported ${count} locations from GPX.`);
+            const group = new L.featureGroup(markers);
+            map.fitBounds(group.getBounds().pad(0.1));
+        } else {
+            alert("No waypoints found in GPX file.");
+        }
+
+        // Reset input
+        event.target.value = '';
+    };
+    reader.readAsText(file);
+}
