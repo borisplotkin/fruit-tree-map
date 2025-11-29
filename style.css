@@ -201,3 +201,7 @@ body {
     display: inline-block;
     text-decoration: underline;
 }
+
+.hidden {
+    display: none !important;
+}
