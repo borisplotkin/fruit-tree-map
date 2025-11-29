@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Fruit Tree Map</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4CAF50">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+     crossorigin=""/>
+     
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="map"></div>
+
+    <div class="controls">
+        <button id="btn-add-location" class="fab" title="Add Current Location">
+            <i class="fas fa-location-crosshairs"></i>
+        </button>
+        <button id="btn-add-manual" class="fab secondary" title="Add Manually">
+            <i class="fas fa-plus"></i>
+        </button>
+    </div>
+
+    <!-- Modal for adding tree details -->
+    <div id="tree-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2>Add Fruit Tree</h2>
+            <form id="tree-form">
+                <div class="form-group">
+                    <label for="tree-type">Tree Type</label>
+                    <select id="tree-type" required>
+                        <option value="Apple">Apple</option>
+                        <option value="Pear">Pear</option>
+                        <option value="Cherry">Cherry</option>
+                        <option value="Plum">Plum</option>
+                        <option value="Peach">Peach</option>
+                        <option value="Lemon">Lemon</option>
+                        <option value="Orange">Orange</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="tree-name">Description / Name</label>
+                    <input type="text" id="tree-name" placeholder="e.g. Grandma's Apple Tree">
+                </div>
+                <input type="hidden" id="tree-lat">
+                <input type="hidden" id="tree-lng">
+                
+                <div class="modal-actions">
+                    <button type="button" id="btn-cancel" class="btn-text">Cancel</button>
+                    <button type="submit" class="btn-primary">Save Tree</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+     crossorigin=""></script>
+     
+    <script src="app.js"></script>
+</body>
+</html>

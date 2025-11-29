@@ -1,0 +1,20 @@
+{
+    "name": "Fruit Tree Map",
+    "short_name": "FruitMap",
+    "start_url": "./index.html",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#4CAF50",
+    "icons": [
+      {
+        "src": "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/markers/marker-icon-2x-green.png",
+        "sizes": "192x192",
+        "type": "image/png"
+      },
+      {
+        "src": "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/markers/marker-icon-2x-green.png",
+        "sizes": "512x512",
+        "type": "image/png"
+      }
+    ]
+  }
