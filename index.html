@@ -71,22 +71,64 @@
                     <input type="text" id="tree-name" placeholder="e.g. Grandma's Apple Tree">
                 </div>
 
-                <!-- Optional Date Fields -->
-                <div class="form-group">
-                    <label for="date-planted">Date Planted (Optional)</label>
-                    <input type="date" id="date-planted">
-                </div>
-                <div class="form-group">
-                    <label for="date-fruited">Date Fruited (Optional)</label>
-                    <input type="date" id="date-fruited">
-                </div>
-                <div class="form-group">
-                    <label for="date-fertilized">Last Fertilized (Optional)</label>
-                    <input type="date" id="date-fertilized">
-                </div>
-                <div class="form-group">
-                    <label for="date-pruned">Last Pruned (Optional)</label>
-                    <input type="date" id="date-pruned">
+                <!-- Toggle for More Details -->
+                <button type="button" id="btn-toggle-details" class="btn-text"
+                    style="width: 100%; text-align: left; margin-bottom: 10px; color: #4CAF50;">
+                    <i class="fas fa-chevron-down"></i> Show More Details
+                </button>
+
+                <div id="extra-fields" class="hidden">
+                    <div class="form-group">
+                        <label for="tree-condition">Condition</label>
+                        <select id="tree-condition">
+                            <option value="">Select condition...</option>
+                            <option value="Excellent">Excellent</option>
+                            <option value="Good">Good</option>
+                            <option value="Fair">Fair</option>
+                            <option value="Poor">Poor</option>
+                            <option value="Dying">Dying</option>
+                            <option value="Dead">Dead</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="tree-harvest">Harvest Season</label>
+                        <input type="text" id="tree-harvest" placeholder="e.g. Late Summer, September">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="tree-notes">Notes</label>
+                        <textarea id="tree-notes" rows="3" placeholder="Additional details..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="tree-accessibility">Accessibility</label>
+                        <input type="text" id="tree-accessibility" placeholder="e.g. Paved path nearby">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="tree-photo">Photo</label>
+                        <input type="file" id="tree-photo" accept="image/*">
+                        <input type="hidden" id="tree-photo-data"> <!-- To store Base64 -->
+                    </div>
+
+                    <!-- Optional Date Fields -->
+                    <div class="form-group">
+                        <label for="date-planted">Date Planted</label>
+                        <input type="date" id="date-planted">
+                    </div>
+                    <div class="form-group">
+                        <label for="date-fruited">Date Fruited</label>
+                        <input type="date" id="date-fruited">
+                    </div>
+                    <div class="form-group">
+                        <label for="date-fertilized">Last Fertilized</label>
+                        <input type="date" id="date-fertilized">
+                    </div>
+                    <div class="form-group">
+                        <label for="date-pruned">Last Pruned</label>
+                        <input type="date" id="date-pruned">
+                    </div>
                 </div>
 
                 <input type="hidden" id="tree-lat">

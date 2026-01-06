@@ -206,6 +206,24 @@ body {
     display: none !important;
 }
 
+/* Smooth toggle for extra fields */
+#extra-fields {
+    max-height: 2000px;
+    /* Large enough to fit content */
+    opacity: 1;
+    overflow: hidden;
+    transition: max-height 0.4s ease-in-out, opacity 0.4s ease-in-out, margin 0.4s;
+}
+
+#extra-fields.hidden {
+    display: block !important;
+    /* Override global .hidden */
+    max-height: 0;
+    opacity: 0;
+    pointer-events: none;
+    margin: 0;
+}
+
 /* Tree List Page Styles */
 .tree-list-container {
     display: flex;

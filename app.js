@@ -203,6 +203,44 @@ function setupEventListeners() {
     const authToggle = document.getElementById('auth-toggle');
     const authTitle = document.getElementById('auth-title');
     const btnAuthSubmit = document.getElementById('btn-auth-submit');
+    const btnToggleDetails = document.getElementById('btn-toggle-details');
+    const extraFields = document.getElementById('extra-fields');
+    const treePhoto = document.getElementById('tree-photo');
+
+    // Toggle Details
+    if (btnToggleDetails) {
+        btnToggleDetails.addEventListener('click', () => {
+            const isHidden = extraFields.classList.contains('hidden');
+            if (isHidden) {
+                extraFields.classList.remove('hidden');
+                btnToggleDetails.innerHTML = '<i class="fas fa-chevron-up"></i> Show Less Details';
+            } else {
+                extraFields.classList.add('hidden');
+                btnToggleDetails.innerHTML = '<i class="fas fa-chevron-down"></i> Show More Details';
+            }
+        });
+    }
+
+    // Photo Handling
+    if (treePhoto) {
+        treePhoto.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                // Limit size to ~50KB for now to save localStorage space
+                if (file.size > 50000) {
+                    alert("Photo is too large! Please choose a smaller image (under 50KB) or it won't be saved.");
+                    e.target.value = '';
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function (event) {
+                    document.getElementById('tree-photo-data').value = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
 
     // Auth Listeners
     if (btnAuth) {
@@ -355,6 +393,13 @@ function setupEventListeners() {
         const dateFertilized = document.getElementById('date-fertilized').value;
         const datePruned = document.getElementById('date-pruned').value;
 
+        // New Fields
+        const condition = document.getElementById('tree-condition').value;
+        const harvestPeriod = document.getElementById('tree-harvest').value;
+        const notes = document.getElementById('tree-notes').value;
+        const accessibility = document.getElementById('tree-accessibility').value;
+        const photo = document.getElementById('tree-photo-data').value;
+
         const tree = {
             type,
             name,
@@ -364,7 +409,12 @@ function setupEventListeners() {
             datePlanted,
             dateFruited,
             dateFertilized,
-            datePruned
+            datePruned,
+            condition,
+            harvestPeriod,
+            notes,
+            accessibility,
+            photo
         };
 
         saveTree(tree);
@@ -401,6 +451,15 @@ function closeModal() {
     const modal = document.getElementById('tree-modal');
     modal.classList.add('hidden');
     document.getElementById('tree-form').reset();
+    document.getElementById('tree-photo-data').value = '';
+
+    // Reset details toggle
+    const extraFields = document.getElementById('extra-fields');
+    const btnToggleDetails = document.getElementById('btn-toggle-details');
+    if (extraFields && !extraFields.classList.contains('hidden')) {
+        extraFields.classList.add('hidden');
+        btnToggleDetails.innerHTML = '<i class="fas fa-chevron-down"></i> Show More Details';
+    }
 
     if (currentTempMarker) {
         map.removeLayer(currentTempMarker);
@@ -499,7 +558,13 @@ function addMarker(tree) {
     const marker = L.marker([tree.lat, tree.lng], { icon: treeIcon })
         .bindPopup(`
             <h3>${tree.type}</h3>
-            <p>${tree.name || 'No description'}</p>
+            ${tree.photo ? `<img src="${tree.photo}" style="width:100%; max-height:150px; object-fit:cover; border-radius:4px; margin-bottom:8px;">` : ''}
+            <p><strong>${tree.name || 'No description'}</strong></p>
+            ${tree.condition ? `<p>Condition: ${tree.condition}</p>` : ''}
+            ${tree.harvestPeriod ? `<p>Harvest: ${tree.harvestPeriod}</p>` : ''}
+            ${tree.accessibility ? `<p>Access: ${tree.accessibility}</p>` : ''}
+            ${tree.notes ? `<p><em>${tree.notes}</em></p>` : ''}
+            <hr style="margin: 5px 0; border: 0; border-top: 1px solid #eee;">
             ${tree.datePlanted ? `<p><small>Planted: ${tree.datePlanted}</small></p>` : ''}
             ${tree.dateFruited ? `<p><small>Fruited: ${tree.dateFruited}</small></p>` : ''}
             ${tree.dateFertilized ? `<p><small>Fertilized: ${tree.dateFertilized}</small></p>` : ''}
