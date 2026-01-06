@@ -549,7 +549,9 @@ function updateUI(user) {
             appView.classList.remove('hidden');
             // Trigger map resize since it was hidden
             setTimeout(() => {
-                map.invalidateSize();
+                if (typeof map !== 'undefined' && map) {
+                    map.invalidateSize();
+                }
             }, 100);
         }
 

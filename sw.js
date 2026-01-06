@@ -1,4 +1,4 @@
-const CACHE_NAME = 'fruitmap-v1';
+const CACHE_NAME = 'fruitmap-v2';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
