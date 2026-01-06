@@ -238,6 +238,18 @@ function setupEventListeners() {
         });
     }
 
+    const authError = document.getElementById('auth-error');
+
+    const showAuthError = (message) => {
+        authError.textContent = message;
+        authError.classList.remove('hidden');
+    };
+
+    const clearAuthError = () => {
+        authError.textContent = '';
+        authError.classList.add('hidden');
+    };
+
     // Auth Listeners
     const openAuth = () => {
         isLoginMode = true;
@@ -245,6 +257,9 @@ function setupEventListeners() {
         btnAuthSubmit.textContent = 'Login';
         authToggle.textContent = "Don't have an account? Register";
         document.getElementById('remember-me-container').classList.remove('hidden');
+        document.getElementById('confirm-password-container').classList.add('hidden');
+        document.getElementById('auth-password-confirm').required = false;
+        clearAuthError();
         authModal.classList.remove('hidden');
     };
 
@@ -269,6 +284,7 @@ function setupEventListeners() {
         btnAuthCancel.addEventListener('click', () => {
             authModal.classList.add('hidden');
             authForm.reset();
+            clearAuthError();
         });
     }
 
@@ -281,26 +297,38 @@ function setupEventListeners() {
                 btnAuthSubmit.textContent = 'Login';
                 authToggle.textContent = "Don't have an account? Register";
                 document.getElementById('remember-me-container').classList.remove('hidden');
+                document.getElementById('confirm-password-container').classList.add('hidden');
+                document.getElementById('auth-password-confirm').required = false;
             } else {
                 authTitle.textContent = 'Register';
                 btnAuthSubmit.textContent = 'Register';
                 authToggle.textContent = 'Already have an account? Login';
                 document.getElementById('remember-me-container').classList.add('hidden');
+                document.getElementById('confirm-password-container').classList.remove('hidden');
+                document.getElementById('auth-password-confirm').required = true;
             }
+            clearAuthError();
         });
     }
 
     if (authForm) {
         authForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const email = document.getElementById('auth-email').value;
-            const password = document.getElementById('auth-password').value;
+            clearAuthError();
+
+            const email = document.getElementById('auth-email').value.trim();
+            const password = document.getElementById('auth-password').value.trim();
             const rememberMe = document.getElementById('auth-remember-me').checked;
+
+            if (!email || !password) {
+                showAuthError('Please enter both email and password.');
+                return;
+            }
 
             try {
                 if (isLoginMode) {
                     login(email, password, rememberMe);
-                    alert('Login successful!');
+                    // alert('Login successful!'); // Optional: remove alert for smoother flow
                 } else {
                     register(email, password);
                     login(email, password);
@@ -309,7 +337,7 @@ function setupEventListeners() {
                 authModal.classList.add('hidden');
                 authForm.reset();
             } catch (error) {
-                alert(error.message);
+                showAuthError(error.message);
             }
         });
     }
