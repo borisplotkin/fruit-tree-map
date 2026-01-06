@@ -125,6 +125,23 @@ function logout() {
     markers = [];
 }
 
+function requireAuth() {
+    if (!currentUser) {
+        const authModal = document.getElementById('auth-modal');
+        const authTitle = document.getElementById('auth-title');
+        const btnAuthSubmit = document.getElementById('btn-auth-submit');
+        const authToggle = document.getElementById('auth-toggle');
+
+        isLoginMode = true;
+        authTitle.textContent = 'Login';
+        btnAuthSubmit.textContent = 'Login';
+        authToggle.textContent = "Don't have an account? Register";
+        authModal.classList.remove('hidden');
+        return false;
+    }
+    return true;
+}
+
 function initMap() {
     // Base Layers
     const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -251,11 +268,19 @@ function setupEventListeners() {
         });
     }
 
-    // GPX Upload
-    gpxUpload.addEventListener('change', handleGPXUpload);
+    // GPX Upload (with auth check)
+    gpxUpload.addEventListener('change', (e) => {
+        if (!requireAuth()) {
+            e.target.value = ''; // Reset file input
+            return;
+        }
+        handleGPXUpload(e);
+    });
 
-    // Add Current Location
+    // Add Current Location (with auth check)
     btnAddLocation.addEventListener('click', () => {
+        if (!requireAuth()) return;
+
         if (!navigator.geolocation) {
             alert('Geolocation is not supported by your browser');
             return;
@@ -281,8 +306,10 @@ function setupEventListeners() {
         );
     });
 
-    // Add Manual Location
+    // Add Manual Location (with auth check)
     btnAddManual.addEventListener('click', () => {
+        if (!requireAuth()) return;
+
         addingManualMode = !addingManualMode;
 
         if (addingManualMode) {
@@ -376,13 +403,16 @@ function closeModal() {
 function updateUI(user) {
     const btnAuth = document.getElementById('btn-auth');
     const btnLogout = document.getElementById('btn-logout');
+    const btnTreeList = document.getElementById('btn-tree-list');
 
     if (user) {
         if (btnAuth) btnAuth.classList.add('hidden');
         if (btnLogout) btnLogout.classList.remove('hidden');
+        if (btnTreeList) btnTreeList.classList.remove('hidden');
     } else {
         if (btnAuth) btnAuth.classList.remove('hidden');
         if (btnLogout) btnLogout.classList.add('hidden');
+        if (btnTreeList) btnTreeList.classList.add('hidden');
     }
 }
 
