@@ -4,22 +4,11 @@ let markers = [];
 let addingManualMode = false;
 let currentTempMarker = null;
 
-// Firebase Configuration
-// REPLACE WITH YOUR FIREBASE CONFIG
-const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT_ID.appspot.com",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId: "YOUR_APP_ID"
-};
-
-// Initialize Firebase
-let db;
-let auth;
+// Authentication Configuration
+const AUTH_STORAGE_KEY = 'fruitmap_users';
+const SESSION_COOKIE = 'fruitmap_session';
 let currentUser = null;
-let unsubscribe = null;
+let isLoginMode = true;
 
 // Icons
 const treeIcon = L.icon({
@@ -43,32 +32,97 @@ const tempIcon = L.icon({
 // Initialization
 document.addEventListener('DOMContentLoaded', () => {
     initMap();
-    initFirebase();
+    checkSession();
     setupEventListeners();
     registerServiceWorker();
 });
 
-function initFirebase() {
-    try {
-        firebase.initializeApp(firebaseConfig);
-        db = firebase.firestore();
-        auth = firebase.auth();
+// Authentication Functions
+function md5(string) {
+    return CryptoJS.MD5(string).toString();
+}
 
-        // Auth State Listener
-        auth.onAuthStateChanged(user => {
-            currentUser = user;
-            updateUI(user);
-            if (user) {
-                loadTrees();
-            } else {
-                // Clear map on logout
-                markers.forEach(marker => map.removeLayer(marker));
-                markers = [];
-            }
-        });
-    } catch (e) {
-        console.error("Firebase not initialized. Make sure to fill in config.", e);
+function setCookie(name, value, days) {
+    let expires = "";
+    if (days) {
+        const date = new Date();
+        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+        expires = "; expires=" + date.toUTCString();
     }
+    document.cookie = name + "=" + value + expires + "; path=/";
+}
+
+function getCookie(name) {
+    const nameEQ = name + "=";
+    const ca = document.cookie.split(';');
+    for (let i = 0; i < ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+        if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+    }
+    return null;
+}
+
+function deleteCookie(name) {
+    document.cookie = name + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+}
+
+function checkSession() {
+    const email = getCookie(SESSION_COOKIE);
+    if (email) {
+        currentUser = { email };
+        updateUI(currentUser);
+        loadTrees();
+    } else {
+        updateUI(null);
+    }
+}
+
+function register(email, password) {
+    const users = JSON.parse(localStorage.getItem(AUTH_STORAGE_KEY) || '{}');
+
+    if (users[email]) {
+        throw new Error('User already exists');
+    }
+
+    const hashedPassword = md5(password);
+    users[email] = { email, password: hashedPassword };
+    localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(users));
+}
+
+function login(email, password, rememberMe = false) {
+    const users = JSON.parse(localStorage.getItem(AUTH_STORAGE_KEY) || '{}');
+    const user = users[email];
+
+    if (!user) {
+        throw new Error('User not found');
+    }
+
+    const hashedPassword = md5(password);
+    if (user.password !== hashedPassword) {
+        throw new Error('Invalid password');
+    }
+
+    // Create session with cookie
+    if (rememberMe) {
+        setCookie(SESSION_COOKIE, email, 30); // 30 days
+    } else {
+        setCookie(SESSION_COOKIE, email); // Session cookie
+    }
+
+    currentUser = { email };
+    updateUI(currentUser);
+    loadTrees();
+}
+
+function logout() {
+    deleteCookie(SESSION_COOKIE);
+    currentUser = null;
+    updateUI(null);
+
+    // Clear map
+    markers.forEach(marker => map.removeLayer(marker));
+    markers = [];
 }
 
 function initMap() {
@@ -124,23 +178,76 @@ function setupEventListeners() {
     const treeForm = document.getElementById('tree-form');
     const modal = document.getElementById('tree-modal');
     const gpxUpload = document.getElementById('gpx-upload');
-    const btnLogin = document.getElementById('btn-login');
+    const btnAuth = document.getElementById('btn-auth');
     const btnLogout = document.getElementById('btn-logout');
+    const authModal = document.getElementById('auth-modal');
+    const authForm = document.getElementById('auth-form');
+    const btnAuthCancel = document.getElementById('btn-auth-cancel');
+    const authToggle = document.getElementById('auth-toggle');
+    const authTitle = document.getElementById('auth-title');
+    const btnAuthSubmit = document.getElementById('btn-auth-submit');
 
     // Auth Listeners
-    if (btnLogin) {
-        btnLogin.addEventListener('click', () => {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            auth.signInWithPopup(provider).catch(error => {
-                console.error("Login failed:", error);
-                alert("Login failed: " + error.message);
-            });
+    if (btnAuth) {
+        btnAuth.addEventListener('click', () => {
+            isLoginMode = true;
+            authTitle.textContent = 'Login';
+            btnAuthSubmit.textContent = 'Login';
+            authToggle.textContent = "Don't have an account? Register";
+            authModal.classList.remove('hidden');
+        });
+    }
+
+    if (btnAuthCancel) {
+        btnAuthCancel.addEventListener('click', () => {
+            authModal.classList.add('hidden');
+            authForm.reset();
+        });
+    }
+
+    if (authToggle) {
+        authToggle.addEventListener('click', (e) => {
+            e.preventDefault();
+            isLoginMode = !isLoginMode;
+            if (isLoginMode) {
+                authTitle.textContent = 'Login';
+                btnAuthSubmit.textContent = 'Login';
+                authToggle.textContent = "Don't have an account? Register";
+            } else {
+                authTitle.textContent = 'Register';
+                btnAuthSubmit.textContent = 'Register';
+                authToggle.textContent = 'Already have an account? Login';
+            }
+        });
+    }
+
+    if (authForm) {
+        authForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('auth-email').value;
+            const password = document.getElementById('auth-password').value;
+            const rememberMe = document.getElementById('auth-remember').checked;
+
+            try {
+                if (isLoginMode) {
+                    login(email, password, rememberMe);
+                    alert('Login successful!');
+                } else {
+                    register(email, password);
+                    login(email, password, rememberMe);
+                    alert('Registration successful!');
+                }
+                authModal.classList.add('hidden');
+                authForm.reset();
+            } catch (error) {
+                alert(error.message);
+            }
         });
     }
 
     if (btnLogout) {
         btnLogout.addEventListener('click', () => {
-            auth.signOut();
+            logout();
         });
     }
 
@@ -267,77 +374,87 @@ function closeModal() {
 }
 
 function updateUI(user) {
-    const btnLogin = document.getElementById('btn-login');
+    const btnAuth = document.getElementById('btn-auth');
     const btnLogout = document.getElementById('btn-logout');
 
     if (user) {
-        if (btnLogin) btnLogin.classList.add('hidden');
+        if (btnAuth) btnAuth.classList.add('hidden');
         if (btnLogout) btnLogout.classList.remove('hidden');
     } else {
-        if (btnLogin) btnLogin.classList.remove('hidden');
+        if (btnAuth) btnAuth.classList.remove('hidden');
         if (btnLogout) btnLogout.classList.add('hidden');
     }
 }
 
-// Data Persistence (Firestore)
+// Data Persistence (localStorage)
+function getTreesKey() {
+    if (!currentUser) return null;
+    return `fruitmap_trees_${currentUser.email}`;
+}
+
 function loadTrees() {
-    if (!currentUser || !db) return;
+    if (!currentUser) return;
 
-    // Unsubscribe from previous listener if exists
-    if (unsubscribe) unsubscribe();
+    const treesKey = getTreesKey();
+    const treesData = localStorage.getItem(treesKey);
+    const trees = treesData ? JSON.parse(treesData) : [];
 
-    // Listen for real-time updates
-    unsubscribe = db.collection('trees')
-        .where('uid', '==', currentUser.uid)
-        .onSnapshot(snapshot => {
-            // Clear existing markers
-            markers.forEach(marker => map.removeLayer(marker));
-            markers = [];
+    // Clear existing markers
+    markers.forEach(marker => map.removeLayer(marker));
+    markers = [];
 
-            snapshot.forEach(doc => {
-                const tree = doc.data();
-                tree.id = doc.id; // Use Firestore ID
-                addMarker(tree);
-            });
+    // Add markers for all trees
+    trees.forEach(tree => {
+        addMarker(tree);
+    });
 
-            updateDatalist();
-
-            // Fit bounds if first load? Maybe not every update.
-        }, error => {
-            console.error("Error loading trees:", error);
-        });
+    updateDatalist();
 }
 
 function saveTree(tree) {
-    if (!currentUser || !db) {
+    if (!currentUser) {
         alert("Please login to save trees.");
         return;
     }
 
-    // Add user ID to tree
-    tree.uid = currentUser.uid;
+    const treesKey = getTreesKey();
+    const treesData = localStorage.getItem(treesKey);
+    const trees = treesData ? JSON.parse(treesData) : [];
 
-    db.collection('trees').add(tree)
-        .then(() => {
-            console.log("Tree saved!");
-        })
-        .catch(error => {
-            console.error("Error adding tree: ", error);
-            alert("Error saving tree: " + error.message);
-        });
+    // Generate unique ID
+    tree.id = Date.now().toString() + Math.random().toString(36).substr(2, 9);
+
+    // Add tree to array
+    trees.push(tree);
+
+    // Save to localStorage
+    localStorage.setItem(treesKey, JSON.stringify(trees));
+
+    // Add marker to map
+    addMarker(tree);
+    updateDatalist();
+
+    console.log("Tree saved!");
 }
 
 function deleteTree(id) {
     if (!confirm('Are you sure you want to delete this tree?')) return;
-    if (!currentUser || !db) return;
+    if (!currentUser) return;
 
-    db.collection('trees').doc(id).delete()
-        .then(() => {
-            console.log("Tree deleted!");
-        })
-        .catch(error => {
-            console.error("Error removing tree: ", error);
-        });
+    const treesKey = getTreesKey();
+    const treesData = localStorage.getItem(treesKey);
+    const trees = treesData ? JSON.parse(treesData) : [];
+
+    // Filter out the tree to delete
+    const updatedTrees = trees.filter(tree => tree.id !== id);
+
+    // Save updated trees
+    localStorage.setItem(treesKey, JSON.stringify(updatedTrees));
+
+    // Reload trees to update map
+    loadTrees();
+
+    console.log("Tree deleted!");
 }
 
 function addMarker(tree) {
