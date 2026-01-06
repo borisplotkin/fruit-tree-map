@@ -268,6 +268,14 @@ function setupEventListeners() {
         });
     }
 
+    // Tree List Navigation
+    const btnTreeList = document.getElementById('btn-tree-list');
+    if (btnTreeList) {
+        btnTreeList.addEventListener('click', () => {
+            window.location.href = 'trees.html';
+        });
+    }
+
     // GPX Upload (with auth check)
     gpxUpload.addEventListener('change', (e) => {
         if (!requireAuth()) {
