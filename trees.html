@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>My Trees - Fruit Tree Map</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4CAF50">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="tree-list-container">
+        <header class="tree-list-header">
+            <h1><i class="fas fa-tree"></i> My Trees</h1>
+            <button id="btn-logout-page" class="btn-text" title="Logout">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </header>
+
+        <div class="tree-list-content">
+            <div id="tree-count" class="tree-count"></div>
+            <div id="tree-list" class="tree-list">
+                <!-- Trees will be dynamically inserted here -->
+            </div>
+            <div id="empty-state" class="empty-state hidden">
+                <i class="fas fa-seedling" style="font-size: 48px; color: #ccc; margin-bottom: 16px;"></i>
+                <p>No trees added yet.</p>
+                <p style="color: #666;">Go back to the map to add your first tree!</p>
+            </div>
+        </div>
+
+        <div class="tree-list-footer">
+            <button id="btn-back-to-map" class="btn-primary">
+                <i class="fas fa-map"></i> Back to Map
+            </button>
+        </div>
+    </div>
+
+    <!-- Crypto-JS for MD5 hashing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script src="trees.js"></script>
+</body>
+
+</html>
