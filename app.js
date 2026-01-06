@@ -32,6 +32,7 @@ const tempIcon = L.icon({
 // Initialization
 document.addEventListener('DOMContentLoaded', () => {
     initMap();
+    seedTestUser();
     checkSession();
     setupEventListeners();
     registerServiceWorker();
@@ -65,6 +66,16 @@ function getCookie(name) {
 
 function deleteCookie(name) {
     document.cookie = name + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+}
+
+function seedTestUser() {
+    const users = JSON.parse(localStorage.getItem(AUTH_STORAGE_KEY) || '{}');
+    if (!users['test']) {
+        const hashedPassword = md5('test');
+        users['test'] = { email: 'test', password: hashedPassword };
+        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(users));
+        console.log("Test user 'test' created.");
+    }
 }
 
 function checkSession() {
