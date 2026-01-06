@@ -318,6 +318,7 @@ function setupEventListeners() {
 
             const email = document.getElementById('auth-email').value.trim();
             const password = document.getElementById('auth-password').value.trim();
+            const passwordConfirm = document.getElementById('auth-password-confirm').value.trim();
             const rememberMe = document.getElementById('auth-remember-me').checked;
 
             if (!email || !password) {
@@ -330,6 +331,9 @@ function setupEventListeners() {
                     login(email, password, rememberMe);
                     // alert('Login successful!'); // Optional: remove alert for smoother flow
                 } else {
+                    if (password !== passwordConfirm) {
+                        throw new Error('Passwords do not match');
+                    }
                     register(email, password);
                     login(email, password);
                     alert('Registration successful!');
