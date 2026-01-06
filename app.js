@@ -104,11 +104,8 @@ function login(email, password, rememberMe = false) {
     }
 
     // Create session with cookie
-    if (rememberMe) {
-        setCookie(SESSION_COOKIE, email, 30); // 30 days
-    } else {
-        setCookie(SESSION_COOKIE, email); // Session cookie
-    }
+    // Create session with cookie
+    setCookie(SESSION_COOKIE, email); // Session cookie
 
     currentUser = { email };
     updateUI(currentUser);
@@ -281,15 +278,14 @@ function setupEventListeners() {
             e.preventDefault();
             const email = document.getElementById('auth-email').value;
             const password = document.getElementById('auth-password').value;
-            const rememberMe = document.getElementById('auth-remember').checked;
 
             try {
                 if (isLoginMode) {
-                    login(email, password, rememberMe);
+                    login(email, password);
                     alert('Login successful!');
                 } else {
                     register(email, password);
-                    login(email, password, rememberMe);
+                    login(email, password);
                     alert('Registration successful!');
                 }
                 authModal.classList.add('hidden');
@@ -386,6 +382,7 @@ function setupEventListeners() {
         const name = document.getElementById('tree-name').value;
         const lat = parseFloat(document.getElementById('tree-lat').value);
         const lng = parseFloat(document.getElementById('tree-lng').value);
+        const id = document.getElementById('tree-id').value;
 
         // Optional Dates
         const datePlanted = document.getElementById('date-planted').value;
@@ -416,6 +413,13 @@ function setupEventListeners() {
             accessibility,
             photo
         };
+
+        if (id) {
+            tree.id = id;
+            // Preserve original date
+            const existingTree = markers.find(m => m.treeId === id)?.treeData; // We need a way to get old date if we don't store it in hidden
+            // actually saveTree handles logic below
+        }
 
         saveTree(tree);
         // addMarker called inside saveTree success or snapshot listener? 
@@ -452,6 +456,8 @@ function closeModal() {
     modal.classList.add('hidden');
     document.getElementById('tree-form').reset();
     document.getElementById('tree-photo-data').value = '';
+    document.getElementById('tree-id').value = '';
+    document.querySelector('#tree-modal h2').textContent = 'Add Fruit Tree';
 
     // Reset details toggle
     const extraFields = document.getElementById('extra-fields');
@@ -518,20 +524,30 @@ function saveTree(tree) {
     const treesData = localStorage.getItem(treesKey);
     const trees = treesData ? JSON.parse(treesData) : [];
 
-    // Generate unique ID
-    tree.id = Date.now().toString() + Math.random().toString(36).substr(2, 9);
+    // Check if updating existing
+    const existingIndex = trees.findIndex(t => t.id === tree.id);
 
-    // Add tree to array
-    trees.push(tree);
+    if (existingIndex >= 0) {
+        // preserve created date
+        tree.date = trees[existingIndex].date;
+        trees[existingIndex] = tree;
+        console.log("Tree updated!");
+    } else {
+        // Generate unique ID if not present (create mode)
+        if (!tree.id) {
+            tree.id = Date.now().toString() + Math.random().toString(36).substr(2, 9);
+        }
+        tree.date = new Date().toISOString(); // Set created date
+        trees.push(tree);
+        console.log("Tree saved!");
+    }
 
     // Save to localStorage
     localStorage.setItem(treesKey, JSON.stringify(trees));
 
-    // Add marker to map
-    addMarker(tree);
+    // Refresh Map
+    loadTrees(); // Easier than updating single marker for now
     updateDatalist();
-
-    console.log("Tree saved!");
 }
 
 function deleteTree(id) {
@@ -570,12 +586,68 @@ function addMarker(tree) {
             ${tree.dateFertilized ? `<p><small>Fertilized: ${tree.dateFertilized}</small></p>` : ''}
             ${tree.datePruned ? `<p><small>Pruned: ${tree.datePruned}</small></p>` : ''}
             <p><small>Added: ${new Date(tree.date).toLocaleDateString()}</small></p>
-            <div class="delete-btn" onclick="deleteTree('${tree.id}')">Delete Tree</div>
+            <div style="display:flex; gap:10px; margin-top:8px;">
+                <button class="btn-text" style="color:var(--primary-color); padding:0;" onclick="editTree('${tree.id}')"><i class="fas fa-edit"></i> Edit</button>
+                <div class="delete-btn" style="margin-top:0;" onclick="deleteTree('${tree.id}')"><i class="fas fa-trash"></i> Delete</div>
+            </div>
         `);
+
+    // Store data on marker for easy access if needed
+    marker.treeId = tree.id;
+    marker.treeData = tree;
 
     marker.addTo(map);
     markers.push(marker);
 }
+
+function editTree(id) {
+    const treesKey = getTreesKey();
+    const treesData = localStorage.getItem(treesKey);
+    const trees = treesData ? JSON.parse(treesData) : [];
+    const tree = trees.find(t => t.id === id);
+
+    if (!tree) return;
+
+    // Populate Form
+    document.getElementById('tree-id').value = tree.id;
+    document.getElementById('tree-lat').value = tree.lat;
+    document.getElementById('tree-lng').value = tree.lng;
+    document.getElementById('tree-type').value = tree.type || '';
+    document.getElementById('tree-name').value = tree.name || '';
+
+    document.getElementById('date-planted').value = tree.datePlanted || '';
+    document.getElementById('date-fruited').value = tree.dateFruited || '';
+    document.getElementById('date-fertilized').value = tree.dateFertilized || '';
+    document.getElementById('date-pruned').value = tree.datePruned || '';
+
+    document.getElementById('tree-condition').value = tree.condition || '';
+    document.getElementById('tree-harvest').value = tree.harvestPeriod || '';
+    document.getElementById('tree-notes').value = tree.notes || '';
+    document.getElementById('tree-accessibility').value = tree.accessibility || '';
+
+    if (tree.photo) {
+        document.getElementById('tree-photo-data').value = tree.photo;
+        // Optional: Show preview logic here if we added image element to form
+    }
+
+    // Update Modal Title
+    document.querySelector('#tree-modal h2').textContent = 'Edit Fruit Tree';
+
+    // Show extended fields if they have data
+    if (tree.condition || tree.harvestPeriod || tree.notes || tree.accessibility || tree.photo) {
+        const extraFields = document.getElementById('extra-fields');
+        const btnToggleDetails = document.getElementById('btn-toggle-details');
+        extraFields.classList.remove('hidden');
+        btnToggleDetails.innerHTML = '<i class="fas fa-chevron-up"></i> Show Less Details';
+    }
+
+    // Open Modal
+    const modal = document.getElementById('tree-modal');
+    modal.classList.remove('hidden');
+}
+
+// Expose editTree
+window.editTree = editTree;
 
 function updateDatalist() {
     // Simplified: Just use static list or could fetch unique types from Firestore if needed.
