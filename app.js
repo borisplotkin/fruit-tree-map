@@ -104,8 +104,7 @@ function login(email, password, rememberMe = false) {
     }
 
     // Create session with cookie
-    // Create session with cookie
-    setCookie(SESSION_COOKIE, email); // Session cookie
+    setCookie(SESSION_COOKIE, email, rememberMe ? 30 : null);
 
     currentUser = { email };
     updateUI(currentUser);
@@ -240,15 +239,31 @@ function setupEventListeners() {
     }
 
     // Auth Listeners
-    if (btnAuth) {
-        btnAuth.addEventListener('click', () => {
-            isLoginMode = true;
-            authTitle.textContent = 'Login';
-            btnAuthSubmit.textContent = 'Login';
-            authToggle.textContent = "Don't have an account? Register";
-            authModal.classList.remove('hidden');
-        });
-    }
+    const openAuth = () => {
+        isLoginMode = true;
+        authTitle.textContent = 'Login';
+        btnAuthSubmit.textContent = 'Login';
+        authToggle.textContent = "Don't have an account? Register";
+        document.getElementById('remember-me-container').classList.remove('hidden');
+        authModal.classList.remove('hidden');
+    };
+
+    if (btnAuth) btnAuth.addEventListener('click', openAuth);
+
+    // Landing Page Buttons
+    const btnLandingLogin = document.getElementById('btn-landing-login');
+    const btnGetStarted = document.getElementById('btn-get-started');
+
+    if (btnLandingLogin) btnLandingLogin.addEventListener('click', openAuth);
+    if (btnGetStarted) btnGetStarted.addEventListener('click', () => {
+        // Switch to register mode directly if preferred, or just open auth
+        openAuth();
+        // Optional: switch to register
+        isLoginMode = false;
+        authTitle.textContent = 'Register';
+        btnAuthSubmit.textContent = 'Register';
+        authToggle.textContent = 'Already have an account? Login';
+    });
 
     if (btnAuthCancel) {
         btnAuthCancel.addEventListener('click', () => {
@@ -265,10 +280,12 @@ function setupEventListeners() {
                 authTitle.textContent = 'Login';
                 btnAuthSubmit.textContent = 'Login';
                 authToggle.textContent = "Don't have an account? Register";
+                document.getElementById('remember-me-container').classList.remove('hidden');
             } else {
                 authTitle.textContent = 'Register';
                 btnAuthSubmit.textContent = 'Register';
                 authToggle.textContent = 'Already have an account? Login';
+                document.getElementById('remember-me-container').classList.add('hidden');
             }
         });
     }
@@ -278,10 +295,11 @@ function setupEventListeners() {
             e.preventDefault();
             const email = document.getElementById('auth-email').value;
             const password = document.getElementById('auth-password').value;
+            const rememberMe = document.getElementById('auth-remember-me').checked;
 
             try {
                 if (isLoginMode) {
-                    login(email, password);
+                    login(email, password, rememberMe);
                     alert('Login successful!');
                 } else {
                     register(email, password);
@@ -478,11 +496,28 @@ function updateUI(user) {
     const btnLogout = document.getElementById('btn-logout');
     const btnTreeList = document.getElementById('btn-tree-list');
 
+    const landingView = document.getElementById('landing-view');
+    const appView = document.getElementById('app-view');
+
     if (user) {
+        // Show App, Hide Landing
+        if (landingView) landingView.classList.add('hidden');
+        if (appView) {
+            appView.classList.remove('hidden');
+            // Trigger map resize since it was hidden
+            setTimeout(() => {
+                map.invalidateSize();
+            }, 100);
+        }
+
         if (btnAuth) btnAuth.classList.add('hidden');
         if (btnLogout) btnLogout.classList.remove('hidden');
         if (btnTreeList) btnTreeList.classList.remove('hidden');
     } else {
+        // Show Landing, Hide App
+        if (landingView) landingView.classList.remove('hidden');
+        if (appView) appView.classList.add('hidden');
+
         if (btnAuth) btnAuth.classList.remove('hidden');
         if (btnLogout) btnLogout.classList.add('hidden');
         if (btnTreeList) btnTreeList.classList.add('hidden');

@@ -7,6 +7,7 @@
     <title>Fruit Tree Map</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#4CAF50">
+    <link rel="apple-touch-icon" href="images/icon.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
@@ -22,29 +23,83 @@
 
 <body>
 
-    <div id="map"></div>
+    <!-- LANDING VIEW -->
+    <div id="landing-view">
+        <header class="landing-header">
+            <div class="logo">
+                <i class="fas fa-tree"></i> Fruit Tree Map
+            </div>
+            <button id="btn-landing-login" class="btn-primary">Login / Register</button>
+        </header>
 
-    <div class="controls">
-        <button id="btn-auth" class="fab secondary" title="Login/Register">
-            <i class="fas fa-user"></i>
-        </button>
-        <button id="btn-logout" class="fab secondary hidden" title="Logout"
-            style="background-color: #ff4444; color: white;">
-            <i class="fas fa-sign-out-alt"></i>
-        </button>
-        <button id="btn-tree-list" class="fab secondary hidden" title="My Trees">
-            <i class="fas fa-list"></i>
-        </button>
-        <button id="btn-add-location" class="fab" title="Add Current Location">
-            <i class="fas fa-location-crosshairs"></i>
-        </button>
-        <button id="btn-add-manual" class="fab secondary" title="Add Manually">
-            <i class="fas fa-plus"></i>
-        </button>
-        <div class="fab secondary" title="Import GPX" style="position: relative; overflow: hidden;">
-            <i class="fas fa-file-import"></i>
-            <input type="file" id="gpx-upload" accept=".gpx"
-                style="position: absolute; top: 0; left: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer;">
+        <section class="hero">
+            <div class="hero-content">
+                <h1>Map Your Community's Harvest</h1>
+                <p>Collaboratively track, manage, and discover fruit trees in your neighborhood. Never miss a harvest
+                    season again.</p>
+                <button id="btn-get-started" class="btn-primary btn-large">Get Started</button>
+            </div>
+        </section>
+
+        <section class="features">
+            <div class="feature-card">
+                <i class="fas fa-map-marked-alt"></i>
+                <h3>Interactive Map</h3>
+                <p>Pinpoint exact locations of fruit trees with ease.</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-seedling"></i>
+                <h3>Track Details</h3>
+                <p>Record species, condition, harvest times, and more.</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-wifi-slash"></i>
+                <h3>Offline Ready</h3>
+                <p>Works without internet so you can map anywhere.</p>
+            </div>
+        </section>
+
+        <section class="preview">
+            <h2>Experience the App</h2>
+            <div class="preview-grid">
+                <div class="preview-item">
+                    <img src="images/feature_map_view.png" alt="Map View">
+                    <p>Visual Map Interface</p>
+                </div>
+                <div class="preview-item">
+                    <img src="images/feature_add_tree.png" alt="Add Tree Details">
+                    <p>Detailed Tree Tracking</p>
+                </div>
+            </div>
+        </section>
+
+        <footer class="landing-footer">
+            <p>&copy; 2026 Fruit Tree Map Project</p>
+        </footer>
+    </div>
+
+    <!-- APP VIEW -->
+    <div id="app-view" class="hidden">
+        <div id="map"></div>
+        <div class="controls">
+            <button id="btn-logout" class="fab secondary" title="Logout"
+                style="background-color: #ff4444; color: white;">
+                <i class="fas fa-sign-out-alt"></i>
+            </button>
+            <button id="btn-tree-list" class="fab secondary hidden" title="My Trees">
+                <i class="fas fa-list"></i>
+            </button>
+            <button id="btn-add-location" class="fab" title="Add Current Location">
+                <i class="fas fa-location-crosshairs"></i>
+            </button>
+            <button id="btn-add-manual" class="fab secondary" title="Add Manually">
+                <i class="fas fa-plus"></i>
+            </button>
+            <div class="fab secondary" title="Import GPX" style="position: relative; overflow: hidden;">
+                <i class="fas fa-file-import"></i>
+                <input type="file" id="gpx-upload" accept=".gpx"
+                    style="position: absolute; top: 0; left: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer;">
+            </div>
         </div>
     </div>
 
@@ -155,6 +210,11 @@
                 <div class="form-group">
                     <label for="auth-password">Password</label>
                     <input type="password" id="auth-password" placeholder="Password" required>
+                </div>
+                <div class="form-group" id="remember-me-container">
+                    <label style="display: flex; align-items: center; gap: 8px; font-weight: normal; cursor: pointer;">
+                        <input type="checkbox" id="auth-remember-me" style="width: auto; margin: 0;"> Remember Me
+                    </label>
                 </div>
                 <div class="modal-actions">
                     <button type="button" id="btn-auth-cancel" class="btn-text">Cancel</button>
