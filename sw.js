@@ -8,13 +8,10 @@ const ASSETS_TO_CACHE = [
     './images/icon.png',
     './images/feature_map_view.png',
     './images/feature_add_tree.png',
+    './images/marker-icon-2x-green.png',
+    './images/marker-icon-2x-red.png',
+    './images/marker-shadow.png',
     'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
-    'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
-    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
-    'https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js',
-    'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/markers/marker-icon-2x-green.png',
-    'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/markers/marker-icon-2x-red.png',
-    'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png'
 ];
 
 self.addEventListener('install', (event) => {

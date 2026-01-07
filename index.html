@@ -45,65 +45,10 @@
 
 <body>
 
-    <!-- LANDING VIEW -->
-    <div id="landing-view">
-        <header class="landing-header">
-            <div class="logo">
-                <i class="fas fa-tree"></i> Fruit Tree Map
-            </div>
-            <button id="btn-landing-login" class="btn-primary">Login / Register</button>
-        </header>
-
-        <section class="hero">
-            <div class="hero-content">
-                <h1>Map Your Community's Harvest</h1>
-                <p>Collaboratively track, manage, and discover fruit trees in your neighborhood. Never miss a harvest
-                    season again.</p>
-                <button id="btn-get-started" class="btn-primary btn-large">Get Started</button>
-            </div>
-        </section>
-
-        <section class="features">
-            <div class="feature-card">
-                <i class="fas fa-map-marked-alt"></i>
-                <h3>Interactive Map</h3>
-                <p>Pinpoint exact locations of fruit trees with ease.</p>
-            </div>
-            <div class="feature-card">
-                <i class="fas fa-seedling"></i>
-                <h3>Track Details</h3>
-                <p>Record species, condition, harvest times, and more.</p>
-            </div>
-            <div class="feature-card">
-                <i class="fas fa-wifi-slash"></i>
-                <h3>Offline Ready</h3>
-                <p>Works without internet so you can map anywhere.</p>
-            </div>
-        </section>
-
-        <section class="preview">
-            <h2>Experience the App</h2>
-            <div class="preview-grid">
-                <div class="preview-item">
-                    <img src="images/feature_map_view.png" alt="Map View">
-                    <p>Visual Map Interface</p>
-                </div>
-                <div class="preview-item">
-                    <img src="images/feature_add_tree.png" alt="Add Tree Details">
-                    <p>Detailed Tree Tracking</p>
-                </div>
-            </div>
-        </section>
-
-        <footer class="landing-footer">
-            <p>&copy; 2026 Fruit Tree Map Project</p>
-        </footer>
-    </div>
-
     <!-- APP VIEW -->
-    <div id="app-view" class="hidden">
+    <div id="app-view">
         <div id="map"></div>
-        <div class="controls">
+        <div class="controls hidden">
             <button id="btn-logout" class="fab secondary" title="Logout"
                 style="background-color: #ff4444; color: white;">
                 <i class="fas fa-sign-out-alt"></i>

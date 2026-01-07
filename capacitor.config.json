@@ -1,0 +1,6 @@
+{
+    "appId": "com.fruittreemap.app",
+    "appName": "Fruit Tree Map",
+    "webDir": ".",
+    "bundledWebRuntime": false
+}

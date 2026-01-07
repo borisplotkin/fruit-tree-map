@@ -12,8 +12,8 @@ let isLoginMode = true;
 
 // Icons
 const treeIcon = L.icon({
-    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/markers/marker-icon-2x-green.png',
-    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+    iconUrl: 'images/marker-icon-2x-green.png',
+    shadowUrl: 'images/marker-shadow.png',
     iconSize: [25, 41],
     iconAnchor: [12, 41],
     popupAnchor: [1, -34],
@@ -21,8 +21,8 @@ const treeIcon = L.icon({
 });
 
 const tempIcon = L.icon({
-    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/markers/marker-icon-2x-red.png',
-    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+    iconUrl: 'images/marker-icon-2x-red.png',
+    shadowUrl: 'images/marker-shadow.png',
     iconSize: [25, 41],
     iconAnchor: [12, 41],
     popupAnchor: [1, -34],
@@ -51,6 +51,9 @@ function setCookie(name, value, days) {
         expires = "; expires=" + date.toUTCString();
     }
     document.cookie = name + "=" + value + expires + "; path=/";
+
+    // Also store in localStorage for file:// protocol support
+    localStorage.setItem(name, value);
 }
 
 function getCookie(name) {
@@ -61,11 +64,14 @@ function getCookie(name) {
         while (c.charAt(0) === ' ') c = c.substring(1, c.length);
         if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
     }
-    return null;
+
+    // Fallback to localStorage
+    return localStorage.getItem(name);
 }
 
 function deleteCookie(name) {
     document.cookie = name + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    localStorage.removeItem(name);
 }
 
 function seedTestUser() {
@@ -202,7 +208,6 @@ function setupEventListeners() {
     const treeForm = document.getElementById('tree-form');
     const modal = document.getElementById('tree-modal');
     const gpxUpload = document.getElementById('gpx-upload');
-    const btnAuth = document.getElementById('btn-auth');
     const btnLogout = document.getElementById('btn-logout');
     const authModal = document.getElementById('auth-modal');
     const authForm = document.getElementById('auth-form');
@@ -274,22 +279,6 @@ function setupEventListeners() {
         authModal.classList.remove('hidden');
     };
 
-    if (btnAuth) btnAuth.addEventListener('click', openAuth);
-
-    // Landing Page Buttons
-    const btnLandingLogin = document.getElementById('btn-landing-login');
-    const btnGetStarted = document.getElementById('btn-get-started');
-
-    if (btnLandingLogin) btnLandingLogin.addEventListener('click', openAuth);
-    if (btnGetStarted) btnGetStarted.addEventListener('click', () => {
-        // Switch to register mode directly if preferred, or just open auth
-        openAuth();
-        // Optional: switch to register
-        isLoginMode = false;
-        authTitle.textContent = 'Register';
-        btnAuthSubmit.textContent = 'Register';
-        authToggle.textContent = 'Already have an account? Login';
-    });
 
     if (btnAuthCancel) {
         btnAuthCancel.addEventListener('click', () => {
@@ -535,37 +524,20 @@ function closeModal() {
 }
 
 function updateUI(user) {
-    const btnAuth = document.getElementById('btn-auth');
     const btnLogout = document.getElementById('btn-logout');
     const btnTreeList = document.getElementById('btn-tree-list');
-
-    const landingView = document.getElementById('landing-view');
     const appView = document.getElementById('app-view');
+    const controls = document.querySelector('.controls');
 
     if (user) {
-        // Show App, Hide Landing
-        if (landingView) landingView.classList.add('hidden');
-        if (appView) {
-            appView.classList.remove('hidden');
-            // Trigger map resize since it was hidden
-            setTimeout(() => {
-                if (typeof map !== 'undefined' && map) {
-                    map.invalidateSize();
-                }
-            }, 100);
-        }
-
-        if (btnAuth) btnAuth.classList.add('hidden');
         if (btnLogout) btnLogout.classList.remove('hidden');
         if (btnTreeList) btnTreeList.classList.remove('hidden');
+        if (controls) controls.classList.remove('hidden');
     } else {
-        // Show Landing, Hide App
-        if (landingView) landingView.classList.remove('hidden');
-        if (appView) appView.classList.add('hidden');
-
-        if (btnAuth) btnAuth.classList.remove('hidden');
         if (btnLogout) btnLogout.classList.add('hidden');
         if (btnTreeList) btnTreeList.classList.add('hidden');
+        if (controls) controls.classList.add('hidden');
+        requireAuth();
     }
 }
 

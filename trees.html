@@ -20,9 +20,21 @@
     <div class="tree-list-container">
         <header class="tree-list-header">
             <h1><i class="fas fa-tree"></i> My Trees</h1>
-            <button id="btn-logout-page" class="btn-text" title="Logout">
-                <i class="fas fa-sign-out-alt"></i> Logout
-            </button>
+            <div class="header-actions">
+                <div class="dropdown">
+                    <button id="btn-export-toggle" class="btn-text" title="Export Data">
+                        <i class="fas fa-file-export"></i> Export
+                    </button>
+                    <div id="export-dropdown" class="dropdown-content hidden">
+                        <button id="export-gpx"><i class="fas fa-file-code"></i> GPX Format</button>
+                        <button id="export-csv"><i class="fas fa-file-csv"></i> CSV Format</button>
+                        <button id="export-cloud"><i class="fas fa-cloud-upload-alt"></i> Backup to Cloud</button>
+                    </div>
+                </div>
+                <button id="btn-logout-page" class="btn-text" title="Logout">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
         </header>
 
         <div class="tree-list-content">
